@@ -45,5 +45,11 @@ def get_IDs_from_psiblast (psiblast_outFile):
                 m = UP_regex.match(line) # match
                 if m: # avoids None type objects when there are not matches
                     UniProt_IDs.add(m.group()) # append the word that matched
+        
+        if UniProt_IDs: # check that UniProt_IDs is not empty
+            return(UniProt_IDs)   
 
-    return(UniProt_IDs)              
+        else:
+            raise SystemExit('No homologues found in UniProt. Exiting the program.')    
+
+
