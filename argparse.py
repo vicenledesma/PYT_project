@@ -1,3 +1,7 @@
+###########################################
+############ COMMAND LINE ARGS ############
+###########################################
+
 import argparse
 parser = argparse.ArgumentParser (description = """This program calculates a flexibility score for the amino acids of protein sequence or a family of proteins.
                                                 It returns a parseable text output file and a graphical representation of the scores. """)
