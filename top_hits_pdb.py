@@ -32,7 +32,7 @@ def get_IDs_from_blastp_PDB (blastp_outFile, number_hits=20):
 
 list_id_chain=get_IDs_from_blastp_PDB(pdb_file,2)
 
-dir_pdb=("/Users/sarapoloalonso/Documents/Apuntes_2/PYT/Proyecto/stamp/pdb/")
+dir_pdb=("/Users/sarapoloalonso/Documents/Apuntes_2/PYT/Proyecto/pdb_down/")
 
 
 def download_pdb (list_id_chain, pdb_location):
@@ -62,7 +62,7 @@ def download_pdb (list_id_chain, pdb_location):
 
 list_chain_separated=download_pdb(list_id_chain, dir_pdb)
 
-dir_split='/Users/sarapoloalonso/Documents/Apuntes_2/PYT/Proyecto/stamp/pdb/split/'
+dir_split='/Users/sarapoloalonso/Documents/Apuntes_2/PYT/Proyecto/pdb_down/split/'
 def select_chain_from_pdb(id_chain_pdb, pdb_location, pdb_split_location):
     """Split the PDB files, creating new ones that
     contain only the data of the selected chains"""
