@@ -91,6 +91,8 @@ def select_chain_from_pdb(id_chain_pdb, pdb_location, pdb_split_location):
         current_file = pdb_location + file_name[0] + '.pdb' # name of downloaded file
         selected_chain = file_name[1] # chain
         output_file = pdb_split_location + file_name[0] + "_" + selected_chain + '.pdb' # name output file
+        
+        found_chain = False
 
         with open (output_file, 'w') as pdb_split: # create for writing
             with open (current_file) as pdb_not_split: # open for reading
@@ -98,6 +100,11 @@ def select_chain_from_pdb(id_chain_pdb, pdb_location, pdb_split_location):
                     if line.startswith('ATOM') and line[21] == selected_chain:
                         # select residues of the chain
                         pdb_split.write(line) # write to the output file
+                        found_chain = True # change Boolean
+                        
+                    elif line.startswith("TER") and found_chain: # avoid repetition in output
+                        break
+
 
         sys.stderr.write("%s PDB file split successfully, chain %s selected \n" %(file_name[0], file_name[1]))
 
