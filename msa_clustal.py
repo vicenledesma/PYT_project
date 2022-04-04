@@ -82,13 +82,3 @@ def assign_msa_record_indices(msa_records):
 
     return(msa_indices_dict)
 
-
-
-
-
-
-a = read_msa("example_OUT_clustal.fasta")
-print(a)
-
-b = assign_msa_record_indices(a)
-print(b[])

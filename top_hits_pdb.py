@@ -9,30 +9,28 @@ from urllib import request
 from Bio import PDB
 
 
-def get_IDs_from_blastp_PDB (blastp_outFile, number_hits = 20):
+def get_IDs_from_blastp_PDB (blastp_outFile, number_hits):
 
     """ Parses  BLASTP output file and retrieves the PDB IDs for the hits. It selects
     only the indicated number of first hits """
 
     n = 0 # start counter
 
-    # regular expresion for PDB IDs
-    PDB_regex = re.compile("[0-9][a-zA-Z_0-9]{3}_[A-Z]")
-
-    PDB_IDs = set() # avoid repetition
+    PDB_IDs_to_download = set() # avoid repetition
 
     with open(blastp_outFile) as bpfile:
         for line in bpfile:
-            m = PDB_regex.match(line) # match
+            records = line.split()
+            PDB_ID = records[1] # match
 
-            if (m and n < number_hits): # avoids None type objects when there are not matches and
+            if (PDB_ID and n < number_hits): # avoids None type objects when there are not matches and
                                         # selects the indicated number of hits
 
-                PDB_IDs.add(m.group()) # append the word that matched
+                PDB_IDs_to_download.add(PDB_ID) # append the word that matched
                 n = n+1
 
-        if PDB_IDs: # check that UniProt_IDs is not empty
-            return(PDB_IDs)
+        if PDB_IDs_to_download: # check that UniProt_IDs is not empty
+            return(PDB_IDs_to_download)
 
         else:
             raise SystemExit('No homologues found in UniProt. Exiting the program.')
@@ -41,7 +39,7 @@ def get_IDs_from_blastp_PDB (blastp_outFile, number_hits = 20):
 def download_pdb (list_id_chain, pdb_location):
 
     """ Separates the PDB IDs and chains and saves them as a tupple to a list (output).
-    Then downloads the PDB files of  the 20 first hits of the psi-blast and saves them 
+    Then downloads the PDB files of the first hits of the psi-blast and saves them 
     to the folder 'pdb' """
 
     # Create tupple list
@@ -53,8 +51,8 @@ def download_pdb (list_id_chain, pdb_location):
     else:
         os.mkdir(pdb_location) # create directory if it does not exist
 
-    for hit_20 in list_id_chain:
-        PDB_all = hit_20.split('_') # separate id and chains
+    for hit_top in list_id_chain:
+        PDB_all = hit_top.split('_') # separate id and chains
 
         id = PDB_all[0].upper() # pdb id
         chain = PDB_all[1].upper() # pdb homolog chain

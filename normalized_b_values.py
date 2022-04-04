@@ -9,7 +9,6 @@ import statistics
 def get_seq_B_from_PDB (PDB_file):
 
     """
-
     Reads a PDB file and extracts the B factors for
     the alpha carbons of each amino acid. Returns a dictionary
     with two keys:
@@ -20,7 +19,6 @@ def get_seq_B_from_PDB (PDB_file):
         * "B_val_list": list of tupples with the code and the B-value
                         for each alpha carbon of the amino acids in the
                         PDB file
-
     """
 
     # parse file
@@ -54,13 +52,9 @@ def get_seq_B_from_PDB (PDB_file):
 
     return(seq_Bval_dict)
 
-## Example
-
-dict_seq_bval = get_seq_B_from_PDB("3am6.pdb")
-# print(dict_seq_bval)
-
 def normalized_b_values(dict_seq_bval):
-    """ Takes a dictionary with 2 keys as input:
+    """ 
+    Takes a dictionary with 2 keys as input:
     * "FASTA_seq": the sequence from the crystallized protein
                    in FASTA format
 
@@ -75,7 +69,6 @@ def normalized_b_values(dict_seq_bval):
     * "B_val_list": list of tupples with the code and the B-value _normalized_
                     for each alpha carbon of the amino acids in the
                     PDB file
-
     """
     list_seq_bval = dict_seq_bval["B_val_list"]
     # value of dict with key "B_val_list"
@@ -98,5 +91,4 @@ def normalized_b_values(dict_seq_bval):
     # asign value to dict key
     return (dict_seq_bval)
 
-dict_res_bvalues_norm=normalized_b_values(dict_seq_bval)
-print(dict_res_bvalues_norm)
+
