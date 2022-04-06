@@ -12,6 +12,15 @@ import psi_BLAST_PSSM
 import top_hits_pdb
 import normalized_b_values
 import msa_clustal
+import calculate_flexibility
+
+### Create new directory for results
+
+if os.path.isdir("flexibility"):
+    os.system("rm -r flexibility")
+else:
+    os.mkdir("flexibility")
+    os.chdir("./flexibility")
 
 ### Check input
 
@@ -116,50 +125,20 @@ msa_records_with_indices = msa_clustal.assign_msa_record_indices(msa_records)
 
 ## Calculate flexibility per position
 
-def calculate_flex_pos(B_val_dict, pos_dict, score_dict):
-    ''' Function that takes a dictionary with normalized B-values, a dictionary 
-    with the indexed position of a MSA and a dictionary with BLAST scores and returns
-    a list of (residue, flexibility) tuples for a query. '''
-    print (B_val_dict)
-    flexibility_position_list = []
+incomplete_flexibility = calculate_flexibility.calculate_flex_pos(all_seq_Bnorm, msa_records_with_indices, PDB_scores_to_download)
+complete_flexibility = calculate_flexibility.complete_missing_scores(incomplete_flexibility)
 
-    query_position = pos_dict.pop("query")
-    #print(query_position)
+### Create perseable text output file
+def create_output_file (prefix, complete_flex_list):
 
-    for query_index_tuple in query_position:
+    '''Creates parseable text file with the flexibility scores.'''
 
-        B_vals_weighted = []
-        scores = []
-        
-        query_residue = query_index_tuple[0]
-        query_MSA_index = query_index_tuple[1]
+    fd = open(prefix + ".txt", "w")
+    fd.write("Residue\t\t\tFlexibility\t\tConfidence\n")
 
-        for template_ID, template_index_list in pos_dict.items():
-            for template_index_tuple in template_index_list:
+    for residue in complete_flex_list:
+        fd.write(residue[0] + "\t\t\t" + "%+.3f\t\t\t" % (residue[1]) + str(residue[2]) + "\n")
 
-                template_MSA_index = template_index_tuple[1]
-                template_PDB_index = template_index_tuple[2]
+    fd.close()
 
-                if query_MSA_index == template_MSA_index:
-                    B_val_raw = float(B_val_dict[template_ID]["B_val_list"][template_PDB_index][1])
-                    B_vals_weighted.append(B_val_raw * float(score_dict[template_ID]))
-                    scores.append(float(score_dict[template_ID]))
-                    print(B_vals_weighted)
-                    print(scores)
-                       
-        if (B_vals_weighted and scores):
-            flexibility_position_list.append((query_residue,(sum(B_vals_weighted)/sum(scores))))
-                
-    print(flexibility_position_list)
-
-    
-        
-
-
-
-
-### Pruebas
-
-calculate_flex_pos(all_seq_Bnorm, msa_records_with_indices, PDB_scores_to_download)
-
-
+create_output_file(output_prefix, complete_flexibility)

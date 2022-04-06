@@ -27,4 +27,4 @@ options = parser.parse_args()
 
 input_sequence = options.input_sequence
 input_family = options.input_family
-output_file = options.outfile
+output_prefix = options.outfile

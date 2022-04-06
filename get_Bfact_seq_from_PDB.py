@@ -8,7 +8,6 @@ from Bio.PDB.Polypeptide import three_to_one
 def get_seq_B_from_PDB (PDB_file):
 
     """ 
-
     Reads a PDB file and extracts the B factors for
     the alpha carbons of each amino acid. Returns a dictionary 
     with two keys:
@@ -19,7 +18,6 @@ def get_seq_B_from_PDB (PDB_file):
         * "B_val_list": list of tupples with the code and the B-value
                         for each alpha carbon of the amino acids in the
                         PDB file
-        
     """
 
     # parse file
