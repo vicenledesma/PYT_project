@@ -11,29 +11,32 @@ from Bio import PDB
 
 def get_IDs_from_blastp_PDB (blastp_outFile, number_hits):
 
-    """ Parses  BLASTP output file and retrieves the PDB IDs for the hits. It selects
-    only the indicated number of first hits """
+    """ Parses  BLASTP output file and retrieves the PDB IDs and the scores
+    for the hits. Returns them as a dictionary: ID -> score """
 
-    n = 0 # start counter
+    # regular expresion for PDB IDs
 
-    PDB_IDs_to_download = set() # avoid repetition
+    PDB_ID_score = {}
+    
+    n = 0 # counter for number of hits
 
     with open(blastp_outFile) as bpfile:
         for line in bpfile:
             records = line.split()
-            PDB_ID = records[1] # match
-
-            if (PDB_ID and n < number_hits): # avoids None type objects when there are not matches and
-                                        # selects the indicated number of hits
-
-                PDB_IDs_to_download.add(PDB_ID) # append the word that matched
-                n = n+1
-
-        if PDB_IDs_to_download: # check that UniProt_IDs is not empty
-            return(PDB_IDs_to_download)
-
+            PDB_ID = records[1]
+            score = records[11]
+            
+            n+=1
+            
+            if (PDB_ID and n <= number_hits): # check that we have ID
+                PDB_ID_score[PDB_ID.upper()] = score
+                
+        if PDB_ID_score: # check dictionary not empty
+            return(PDB_ID_score)  
+            
         else:
-            raise SystemExit('No homologues found in UniProt. Exiting the program.')
+            raise SystemExit('No homologues found in UniProt. Exiting the program.')    
+
         
 
 def download_pdb (list_id_chain, pdb_location):

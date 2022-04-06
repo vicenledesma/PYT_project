@@ -70,20 +70,26 @@ def normalized_b_values(dict_seq_bval):
                     for each alpha carbon of the amino acids in the
                     PDB file
     """
+    
     list_seq_bval = dict_seq_bval["B_val_list"]
+    
     # value of dict with key "B_val_list"
+    
     list_b_val_before = [] # list b-values before normalizing
     list_b_val_norm = [] # list b-values after normalizing
     list_res = []
     res_b_val_norm = []
+    
     for residue_b_val in list_seq_bval:
         list_res.append(residue_b_val[0])
         list_b_val_before.append(residue_b_val[1])
+        
     for b_val_not_norm in list_b_val_before:
         b_val_norm = round((b_val_not_norm-statistics.mean(list_b_val_before))/statistics.stdev(list_b_val_before), 5)
         # b val norm with 5 decimal positions
         list_b_val_norm.append(b_val_norm)
         res_b_val_norm = list(zip(list_res, list_b_val_norm))
+        
         # join two list in a third one
     dict_seq_bval["B_val_list"] = ""
     # delete previous value of the dictionary

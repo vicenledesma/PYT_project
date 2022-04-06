@@ -46,28 +46,3 @@ def run_psiblast_homologues_PSSM (FASTA_seq,
     psiblast_cline_exec = str(psiblast_cline)
     os.system(psiblast_cline_exec)        
 
-
-def get_IDs_from_blastp_PDB (blastp_outFile):
-
-    """ Parses  BLASTP output file and retrieves the PDB IDs and the scores
-    for the hits. Returns them as a dictionary: ID -> score """
-
-    # regular expresion for PDB IDs
-
-    PDB_ID_score = {}
-
-    with open(blastp_outFile) as bpfile:
-        for line in bpfile:
-
-            records = line.split()
-            PDB_ID = records[1]
-            score = records[11]
-
-            PDB_ID_score[PDB_ID] = score
-
-        if PDB_ID_score: # check that UniProt_IDs is not empty
-            return(PDB_ID_score)  
-
-        else:
-            raise SystemExit('No homologues found in UniProt. Exiting the program.')    
-

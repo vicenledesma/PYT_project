@@ -47,8 +47,3 @@ def get_seq_B_from_PDB (PDB_file):
                         seq_Bval_dict["B_val_list"].append((three_to_one(residue.get_resname()), atom.get_bfactor()))
     
     return(seq_Bval_dict)
-
-## Example
-
-pedro = get_seq_B_from_PDB("3am6.pdb")
-print(pedro)

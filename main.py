@@ -1,7 +1,7 @@
-# #########################################
-# ############## MAIN PROGRAM #############
-# #########################################
-# ### Import modules
+#########################################
+############## MAIN PROGRAM #############
+#########################################
+### Import modules
 
 from ast import dump
 import sys
@@ -28,7 +28,7 @@ else:
 
 if input_family: # convert protein family to consensus sequence
     input_file = open('consensus_seq.fa', 'w')
-    input_file.write(">family\n")
+    input_file.write(">query\n")
     input_file.write(str(consensus_seq.get_consensus_seq(input_family)))
     input_file.close()
     input_sequence = input_file.name
@@ -56,15 +56,15 @@ psi_BLAST_PSSM.run_psiblast_homologues_PSSM(FASTA_seq = input_sequence,
 
 ### Get hits from PDB
 
-PDB_to_download = top_hits_pdb.get_IDs_from_blastp_PDB("psiblast_pdb_1.out",
+PDB_scores_to_download = top_hits_pdb.get_IDs_from_blastp_PDB("psiblast_pdb_1.out",
                                                         number_hits = 7)
 
-list_id_PDB = top_hits_pdb.download_pdb (PDB_to_download, os.getcwd() + "/PDB_downloads/")
+list_id_PDB = top_hits_pdb.download_pdb (PDB_scores_to_download.keys(), os.getcwd() + "/PDB_downloads/")
 
 top_hits_pdb.select_chain_from_pdb(list_id_PDB, os.getcwd() + "/PDB_downloads/", os.getcwd() + "/PDB_downloads/split/")
 
-### Extract protein sequences from the PDB files
-## File for CLUSTAL MSA
+## Extract protein sequences from the PDB files
+# File for CLUSTAL MSA
 
 hits_for_MSA_file = open('top_hits_split_chain.fa', 'w')
 
@@ -73,19 +73,33 @@ all_seq_Bnorm = {}
 for PDB_split_file in (os.listdir(os.getcwd() + "/PDB_downloads/split")):
     seq_B = normalized_b_values.get_seq_B_from_PDB(os.getcwd() + "/PDB_downloads/split/" + PDB_split_file)
 
-    # Create input for MSA
+    # Create input for MSA: templates
 
     hits_for_MSA_file.write (">" + PDB_split_file.split(".")[0] + "\n")
     hits_for_MSA_file.write (seq_B["FASTA_seq"] + "\n")
 
-    # Normalize and append to bid dictionary
+    # Normalize and append to big dictionary
 
     seq_B_norm = normalized_b_values.normalized_b_values(seq_B)
     all_seq_Bnorm[PDB_split_file.split(".")[0]] = seq_B_norm
 
-hits_for_MSA_file.close()
+# Add query to MSA input
 
-print(all_seq_Bnorm)
+hits_for_MSA_file.write(">query\n")
+
+if input_family:
+
+    hits_for_MSA_file.write(str(consensus_seq.get_consensus_seq(input_family)))
+
+elif input_sequence:
+    fd = open (input_sequence, "r")
+    for line in fd:
+        if not line.startswith(">"):
+            hits_for_MSA_file.write(line)
+
+    fd.close()
+
+hits_for_MSA_file.close()
 
 ### CLUSTAL MSA
 
@@ -99,5 +113,53 @@ msa_records = msa_clustal.read_msa("PDB_MSA_clustalo.out.fasta")
 ## Assign indices
 
 msa_records_with_indices = msa_clustal.assign_msa_record_indices(msa_records)
-print(msa_records_with_indices)
+
+## Calculate flexibility per position
+
+def calculate_flex_pos(B_val_dict, pos_dict, score_dict):
+    ''' Function that takes a dictionary with normalized B-values, a dictionary 
+    with the indexed position of a MSA and a dictionary with BLAST scores and returns
+    a list of (residue, flexibility) tuples for a query. '''
+    print (B_val_dict)
+    flexibility_position_list = []
+
+    query_position = pos_dict.pop("query")
+    #print(query_position)
+
+    for query_index_tuple in query_position:
+
+        B_vals_weighted = []
+        scores = []
+        
+        query_residue = query_index_tuple[0]
+        query_MSA_index = query_index_tuple[1]
+
+        for template_ID, template_index_list in pos_dict.items():
+            for template_index_tuple in template_index_list:
+
+                template_MSA_index = template_index_tuple[1]
+                template_PDB_index = template_index_tuple[2]
+
+                if query_MSA_index == template_MSA_index:
+                    B_val_raw = float(B_val_dict[template_ID]["B_val_list"][template_PDB_index][1])
+                    B_vals_weighted.append(B_val_raw * float(score_dict[template_ID]))
+                    scores.append(float(score_dict[template_ID]))
+                    print(B_vals_weighted)
+                    print(scores)
+                       
+        if (B_vals_weighted and scores):
+            flexibility_position_list.append((query_residue,(sum(B_vals_weighted)/sum(scores))))
+                
+    print(flexibility_position_list)
+
+    
+        
+
+
+
+
+### Pruebas
+
+calculate_flex_pos(all_seq_Bnorm, msa_records_with_indices, PDB_scores_to_download)
+
 
