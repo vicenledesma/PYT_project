@@ -6,26 +6,25 @@ uniprot_file="psiblast_uniprot_1.out"
 def select_hits_uniprot(blastp_outFile, number_hits=5):
     """ Parses  BLASTP output file and retrieves the UniProt IDs for the hits. It selects
     only the indicated number of first hits """
-    n=0
-
-    UniProt_IDs = set() # avoid repetition
-
+    n = 0
+    UniProt_IDs = {}
     with open(blastp_outFile) as bpfile:
         for line in bpfile:
             m = line.split()
 
             if m and n<number_hits: # avoids None type objects when there are not matches
             # selects the indicated number of first hits
-                UniProt_IDs.add(m[1]) # append the word that matched
-                n=n+1
+                UniProt_IDs[m[1]] = m[2] # append the word that matched
+                n+=1
         if UniProt_IDs: # check that UniProt_IDs is not empty
             #print (PDB_IDs)
             return(UniProt_IDs)
+            print(UniProt_IDs)
 
         else:
             raise SystemExit('No homologues found in UniProt. Exiting the program.')
 
-def download_hits_alphafold(list_id_chain, pdb_location):
+def download_hits_alphafold(dict_hits_uniprot, pdb_location):
     """It downloads the PDB files of the first hits from the psi-blast from
     alphafold and saves them into the folder 'pdb' """
     n=0
@@ -38,7 +37,7 @@ def download_hits_alphafold(list_id_chain, pdb_location):
     else:
         os.mkdir(pdb_location) # create directory if it does not exist
 
-    for hit_top in list_id_chain:
+    for hit_top in dict_hits_uniprot:
 
     # Download PDB files
 
@@ -53,3 +52,6 @@ def download_hits_alphafold(list_id_chain, pdb_location):
             pass
     print ("%s homologues found in AlphaFold" %n)
     return (list_id_chain_separated)
+
+sara = select_hits_uniprot(uniprot_file)
+vicen = download_hits_alphafold(sara, "./PDB_downloads/")
