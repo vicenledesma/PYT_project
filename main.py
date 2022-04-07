@@ -14,18 +14,31 @@ import normalized_b_values
 import msa_clustal
 import calculate_flexibility
 
-### Create new directory for results
-
-if os.path.isdir("flexibility"):
-    os.system("rm -r flexibility")
-else:
-    os.mkdir("flexibility")
-    os.chdir("./flexibility")
-
 ### Check input
 
 if ((input_sequence and not input_family) or (not input_sequence and input_family)): # xor, only one input
+    
     sys.stderr.write("Correct input. Processing...\n")
+
+    # remove directory if it already exists
+
+    if os.path.isdir("flexibility"):
+        os.system("rm -r flexibility")
+
+    # create new directory for results
+    
+    os.mkdir("flexibility")
+
+    # move input to new directory
+
+    if input_sequence:
+        os.system("cp " + input_sequence + " ./flexibility")
+
+    else: 
+         os.system("cp " + input_family + " ./flexibility")
+
+    os.chdir("./flexibility")
+
 
 elif (input_sequence and input_family):
     raise SystemExit("Incorrect input. Please, make sure you introduce only one type of input (protein sequence or MSA of protein family in CLUSTAL format).")
@@ -42,23 +55,23 @@ if input_family: # convert protein family to consensus sequence
     input_file.close()
     input_sequence = input_file.name
 
-### PSI-BLAST
-## Get PSSM
+### PSI-BLAST or BLASTP
+# ## Get PSSM
 
-psi_BLAST_PSSM.run_psiblast_homologues_PSSM(FASTA_seq = input_sequence, 
-                                            input_iters = 5, 
-                                            database = "./UniProt/UniProt.db.fasta",
-                                            in_pssm_filename = None,
-                                            out_pssm_filename = "psiblast_uniprot_5.pssm",
-                                            out_hits_filename = "psiblast_uniprot_5.out",
-                                            output_format = 6) # tabular
+# psi_BLAST_PSSM.run_psiblast_homologues_PSSM(FASTA_seq = input_sequence, 
+#                                             input_iters = 1, 
+#                                             database = "../UniProt/UniProt.db.fasta",
+#                                             in_pssm_filename = None,
+#                                             out_pssm_filename = "psiblast_uniprot_5.pssm",
+#                                             out_hits_filename = "psiblast_uniprot_5.out",
+#                                             output_format = 6) # tabular
 
-## Search in PDB with PSSM
+## Search in UniProt with PSSM
 
 psi_BLAST_PSSM.run_psiblast_homologues_PSSM(FASTA_seq = input_sequence, 
                                             input_iters = 1, 
-                                            database = "./PDB_FASTA/PDB.db.fasta",
-                                            in_pssm_filename = "./psiblast_uniprot_5.pssm",
+                                            database = "../UniProt/UniProt.db.fasta",
+                                            in_pssm_filename = None,
                                             out_pssm_filename = "psiblast_pdb_1.pssm",
                                             out_hits_filename = "psiblast_pdb_1.out",
                                             output_format = 6) # tabular
@@ -129,6 +142,7 @@ incomplete_flexibility = calculate_flexibility.calculate_flex_pos(all_seq_Bnorm,
 complete_flexibility = calculate_flexibility.complete_missing_scores(incomplete_flexibility)
 
 ### Create perseable text output file
+
 def create_output_file (prefix, complete_flex_list):
 
     '''Creates parseable text file with the flexibility scores.'''
