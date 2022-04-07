@@ -2,14 +2,16 @@ def calculate_flex_pos(B_val_dict, pos_dict, score_dict):
 
     '''Function that takes a dictionary with normalized B-values, a dictionary 
     with the indexed position of a MSA and a dictionary with BLAST scores and returns
-    a list of (residue, flexibility, confidence) tuples for a query.'''
+    a list of (position, residue, flexibility, confidence) tuples for a query.'''
 
     flexibility_position_list = []
 
     query_position = pos_dict.pop("query")
 
-    for query_index_tuple in query_position:
+    pos = 1 # counter for position
 
+    for query_index_tuple in query_position:
+        
         B_vals_weighted = []
         scores = []
         
@@ -28,10 +30,12 @@ def calculate_flex_pos(B_val_dict, pos_dict, score_dict):
                     scores.append(float(score_dict[template_ID]))
                        
         if (B_vals_weighted and scores):
-            flexibility_position_list.append((query_residue,(sum(B_vals_weighted)/sum(scores)), len(scores)))
+            flexibility_position_list.append((pos, query_residue,(sum(B_vals_weighted)/sum(scores)), len(scores)))
 
         else:
-            flexibility_position_list.append((query_residue,"?", 0))
+            flexibility_position_list.append((pos, query_residue,"?", 0))
+        
+        pos+=1
                 
     return(flexibility_position_list)
 
@@ -56,15 +60,15 @@ def complete_missing_scores (incomplete_flexibility_list):
         scores = []
 
         for flex_tuple in incomplete_flexibility_list:
-            if (flex_tuple[0] == res and flex_tuple[1] != "?"):
-                scores.append(flex_tuple[1])
+            if (flex_tuple[2] == res and flex_tuple[3] != "?"):
+                scores.append(flex_tuple[3])
 
         if scores: # avoid zero division error when there is an amino acid missing
             mean_flex_dict[res]= sum(scores)/len(scores)
 
     for flex_tuple in incomplete_flexibility_list:
-        if flex_tuple[1] == "?":
-            complete_flexibility_list.append((flex_tuple[0], mean_flex_dict[flex_tuple[0]], 0))
+        if flex_tuple[2] == "?":
+            complete_flexibility_list.append((flex_tuple[0], flex_tuple[1], mean_flex_dict.setdefault(flex_tuple[0], 0), 0))
 
 
         else:

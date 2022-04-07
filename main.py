@@ -1,3 +1,5 @@
+
+  
 #########################################
 ############## MAIN PROGRAM #############
 #########################################
@@ -9,10 +11,11 @@ import os
 from argparser import *
 import consensus_seq
 import psi_BLAST_PSSM
-import top_hits_pdb
+import af
 import normalized_b_values
 import msa_clustal
 import calculate_flexibility
+import output_text_graph
 
 ### Check input
 
@@ -72,38 +75,38 @@ psi_BLAST_PSSM.run_psiblast_homologues_PSSM(FASTA_seq = input_sequence,
                                             input_iters = 1, 
                                             database = "../UniProt/UniProt.db.fasta",
                                             in_pssm_filename = None,
-                                            out_pssm_filename = "psiblast_pdb_1.pssm",
-                                            out_hits_filename = "psiblast_pdb_1.out",
+                                            out_pssm_filename = "psiblast_uniprot_1.pssm",
+                                            out_hits_filename = "psiblast_uniprot_1.out",
                                             output_format = 6) # tabular
 
 ### Get hits from PDB
 
-PDB_scores_to_download = top_hits_pdb.get_IDs_from_blastp_PDB("psiblast_pdb_1.out",
-                                                        number_hits = 7)
+AF_scores_to_download = af.select_hits_uniprot("psiblast_uniprot_1.out",
+                                                number_hits = 5)
 
-list_id_PDB = top_hits_pdb.download_pdb (PDB_scores_to_download.keys(), os.getcwd() + "/PDB_downloads/")
+list_id_AF = af.download_hits_alphafold (AF_scores_to_download.keys(), os.getcwd() + "/PDB_downloads/")
 
-top_hits_pdb.select_chain_from_pdb(list_id_PDB, os.getcwd() + "/PDB_downloads/", os.getcwd() + "/PDB_downloads/split/")
+### top_hits_pdb.select_chain_from_pdb(list_id_AF, os.getcwd() + "/PDB_downloads/", os.getcwd() + "/PDB_downloads/split/")
 
 ## Extract protein sequences from the PDB files
 # File for CLUSTAL MSA
 
-hits_for_MSA_file = open('top_hits_split_chain.fa', 'w')
+hits_for_MSA_file = open('top_hits_AF.fa', 'w')
 
 all_seq_Bnorm = {}
 
-for PDB_split_file in (os.listdir(os.getcwd() + "/PDB_downloads/split")):
-    seq_B = normalized_b_values.get_seq_B_from_PDB(os.getcwd() + "/PDB_downloads/split/" + PDB_split_file)
+for AF_file in (os.listdir(os.getcwd() + "/PDB_downloads/")):
+    seq_B = normalized_b_values.get_seq_B_from_PDB(os.getcwd() + "/PDB_downloads/" + AF_file)
 
     # Create input for MSA: templates
 
-    hits_for_MSA_file.write (">" + PDB_split_file.split(".")[0] + "\n")
+    hits_for_MSA_file.write (">" + AF_file.split(".")[0] + "\n")
     hits_for_MSA_file.write (seq_B["FASTA_seq"] + "\n")
 
     # Normalize and append to big dictionary
 
     seq_B_norm = normalized_b_values.normalized_b_values(seq_B)
-    all_seq_Bnorm[PDB_split_file.split(".")[0]] = seq_B_norm
+    all_seq_Bnorm[AF_file.split(".")[0]] = seq_B_norm
 
 # Add query to MSA input
 
@@ -125,12 +128,12 @@ hits_for_MSA_file.close()
 
 ### CLUSTAL MSA
 
-msa_clustal.run_clustalo(hits_for_MSA_file.name, "PDB_MSA_clustalo.out.fasta")
+msa_clustal.run_clustalo(hits_for_MSA_file.name, "AF_MSA_clustalo.out.fasta")
 
 ### Put indices to MSA records
 ## Read MSA
 
-msa_records = msa_clustal.read_msa("PDB_MSA_clustalo.out.fasta")
+msa_records = msa_clustal.read_msa("AF_MSA_clustalo.out.fasta")
 
 ## Assign indices
 
@@ -138,21 +141,13 @@ msa_records_with_indices = msa_clustal.assign_msa_record_indices(msa_records)
 
 ## Calculate flexibility per position
 
-incomplete_flexibility = calculate_flexibility.calculate_flex_pos(all_seq_Bnorm, msa_records_with_indices, PDB_scores_to_download)
+incomplete_flexibility = calculate_flexibility.calculate_flex_pos(all_seq_Bnorm, msa_records_with_indices, AF_scores_to_download)
 complete_flexibility = calculate_flexibility.complete_missing_scores(incomplete_flexibility)
 
 ### Create perseable text output file
 
-def create_output_file (prefix, complete_flex_list):
+output_text_graph.create_output_text(output_prefix, complete_flexibility)
 
-    '''Creates parseable text file with the flexibility scores.'''
+### Draw flexibility graph
 
-    fd = open(prefix + ".txt", "w")
-    fd.write("Residue\t\t\tFlexibility\t\tConfidence\n")
-
-    for residue in complete_flex_list:
-        fd.write(residue[0] + "\t\t\t" + "%+.3f\t\t\t" % (residue[1]) + str(residue[2]) + "\n")
-
-    fd.close()
-
-create_output_file(output_prefix, complete_flexibility)
+output_text_graph.draw_flex_line(complete_flexibility)

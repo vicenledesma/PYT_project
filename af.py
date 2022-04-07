@@ -1,13 +1,22 @@
+####################################################
+############## GET HITS FROM ALPHAFOLD #############
+####################################################
+# LIbraries
 import os
 import re
 import sys
 from urllib import request
+
 uniprot_file="psiblast_uniprot_1.out"
+
 def select_hits_uniprot(blastp_outFile, number_hits=5):
+
     """ Parses  BLASTP output file and retrieves the UniProt IDs for the hits. It selects
     only the indicated number of first hits """
+
     n = 0
     UniProt_IDs = {}
+
     with open(blastp_outFile) as bpfile:
         for line in bpfile:
             m = line.split()
@@ -16,10 +25,9 @@ def select_hits_uniprot(blastp_outFile, number_hits=5):
             # selects the indicated number of first hits
                 UniProt_IDs[m[1]] = m[2] # append the word that matched
                 n+=1
+                
         if UniProt_IDs: # check that UniProt_IDs is not empty
-            #print (PDB_IDs)
             return(UniProt_IDs)
-            print(UniProt_IDs)
 
         else:
             raise SystemExit('No homologues found in UniProt. Exiting the program.')
@@ -50,8 +58,6 @@ def download_hits_alphafold(dict_hits_uniprot, pdb_location):
 
         except:
             pass
+          
     print ("%s homologues found in AlphaFold" %n)
     return (list_id_chain_separated)
-
-sara = select_hits_uniprot(uniprot_file)
-vicen = download_hits_alphafold(sara, "./PDB_downloads/")
