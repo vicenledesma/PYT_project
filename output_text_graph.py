@@ -36,9 +36,6 @@ def draw_flex_line(flexibility_results):
         conf.append(flex_tuple[3])
 
         i = i+1
-    
-    print(pos)
-    print(flex)
 
     plt.plot(pos,flex)
     plt.show()

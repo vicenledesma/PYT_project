@@ -21,7 +21,7 @@ import output_text_graph
 
 if ((input_sequence and not input_family) or (not input_sequence and input_family)): # xor, only one input
     
-    sys.stderr.write("Correct input. Processing...\n")
+    sys.stderr.write("Processing input...\n")
 
     # remove directory if it already exists
 
@@ -54,7 +54,14 @@ else:
 if input_family: # convert protein family to consensus sequence
     input_file = open('consensus_seq.fa', 'w')
     input_file.write(">query\n")
+
+    try:
     input_file.write(str(consensus_seq.get_consensus_seq(input_family)))
+
+    except:
+        raise SystemExit("Cannot obtain consensus sequence for protein family. Are you sure you introduced a MSA in CLUSTAL format?")
+
+
     input_file.close()
     input_sequence = input_file.name
 
@@ -78,15 +85,13 @@ psi_BLAST_PSSM.run_psiblast_homologues_PSSM(FASTA_seq = input_sequence,
                                             out_pssm_filename = "psiblast_uniprot_1.pssm",
                                             out_hits_filename = "psiblast_uniprot_1.out",
                                             output_format = 6) # tabular
-
+                                    
 ### Get hits from PDB
 
 AF_scores_to_download = af.select_hits_uniprot("psiblast_uniprot_1.out",
                                                 number_hits = 5)
 
 list_id_AF = af.download_hits_alphafold (AF_scores_to_download.keys(), os.getcwd() + "/PDB_downloads/")
-
-### top_hits_pdb.select_chain_from_pdb(list_id_AF, os.getcwd() + "/PDB_downloads/", os.getcwd() + "/PDB_downloads/split/")
 
 ## Extract protein sequences from the PDB files
 # File for CLUSTAL MSA
@@ -146,8 +151,21 @@ complete_flexibility = calculate_flexibility.complete_missing_scores(incomplete_
 
 ### Create perseable text output file
 
-output_text_graph.create_output_text(output_prefix, complete_flexibility)
+try:
+    output_text_graph.create_output_text(output_prefix, complete_flexibility)
+
+except:
+    pass
+
+else:
+    sys.stderr.write("The text output file has been created successfully!\n")
 
 ### Draw flexibility graph
 
-output_text_graph.draw_flex_line(complete_flexibility)
+try:
+    output_text_graph.draw_flex_line(complete_flexibility)
+
+except:
+    pass
+else:
+    sys.stderr.write("The plot has been created successfully!\n")
