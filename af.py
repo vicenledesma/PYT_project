@@ -25,8 +25,6 @@ def select_hits_uniprot(blastp_outFile, number_hits=5):
         else:
             raise SystemExit('No homologues found in UniProt. Exiting the program.')
 
-list_id_chain=select_hits_uniprot(uniprot_file)
-
 def download_hits_alphafold(list_id_chain, pdb_location):
     """It downloads the PDB files of the first hits from the psi-blast from
     alphafold and saves them into the folder 'pdb' """
