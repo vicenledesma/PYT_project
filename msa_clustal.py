@@ -34,7 +34,7 @@ def read_msa (MSA_file, MSA_format = "fasta"):
 
         # inform of the results of the alignment
 
-        sys.stderr.write("MSA created correctly with CLUSTAL OMEGA.\n")
+        sys.stderr.write("MSA created correctly with CLUSTAL OMEGA\n")
         sys.stderr.write(str(mult_aln) + "\n")
 
         # separate alignment records, create and return dict
@@ -61,7 +61,6 @@ def assign_msa_record_indices(msa_records):
             * [1]: position in the MSA.
 
             * [2]: position in the PDB file.
-
     """
 
     msa_indices_dict = {} # dictionary for output

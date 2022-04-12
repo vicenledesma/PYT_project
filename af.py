@@ -11,8 +11,8 @@ uniprot_file="psiblast_uniprot_1.out"
 
 def select_hits_uniprot(blastp_outFile, number_hits=5):
 
-    """ Parses  BLASTP output file and retrieves the UniProt IDs for the hits. It selects
-    only the indicated number of first hits """
+    """Parses  BLASTP output file and retrieves the UniProt IDs for the hits. It selects
+    only the indicated number of first hits"""
 
     n = 0
     UniProt_IDs = {}
@@ -34,7 +34,7 @@ def select_hits_uniprot(blastp_outFile, number_hits=5):
 
 def download_hits_alphafold(dict_hits_uniprot, pdb_location):
     """It downloads the PDB files of the first hits from the psi-blast from
-    alphafold and saves them into the folder 'pdb' """
+    alphafold and saves them into the folder 'pdb'"""
     n=0
 
     # Create tupple list

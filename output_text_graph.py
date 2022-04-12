@@ -3,10 +3,12 @@
 ###################################################
 # Libraries
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import numpy as np
 
 def create_output_text (prefix, complete_flex_list):
 
-    '''Creates parseable text file with the flexibility scores.'''
+    '''Creates parseable text file with the flexibility scores'''
 
     fd = open(prefix + ".txt", "w")
     fd.write("Position\t\t\tResidue\t\t\tFlexibility\t\tConfidence\n")
@@ -17,11 +19,9 @@ def create_output_text (prefix, complete_flex_list):
     fd.close()
 
 
-def draw_flex_line(flexibility_results):
+def draw_flex_line(prefix, flexibility_results):
 
-    '''Creates plot of the flexibility results.'''
-
-    i = 1
+    '''Creates plot of the flexibility results'''
 
     pos = []
     res = []
@@ -35,8 +35,11 @@ def draw_flex_line(flexibility_results):
         flex.append(flex_tuple[2])
         conf.append(flex_tuple[3])
 
-        i = i+1
-
     plt.plot(pos,flex)
+    plt.axhline(y=0, color='r', linestyle='-')
+    plt.xlabel("Residue position")
+    plt.ylabel("Flexibility score")
+
+    plt.savefig(prefix + '.png')
     plt.show()
 

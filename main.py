@@ -56,14 +56,14 @@ if input_family: # convert protein family to consensus sequence
     input_file.write(">query\n")
 
     try:
-    input_file.write(str(consensus_seq.get_consensus_seq(input_family)))
+        input_file.write(str(consensus_seq.get_consensus_seq(input_family)))
+        input_file.close()
+        input_sequence = input_file.name  
 
     except:
+        input_file.close()
         raise SystemExit("Cannot obtain consensus sequence for protein family. Are you sure you introduced a MSA in CLUSTAL format?")
 
-
-    input_file.close()
-    input_sequence = input_file.name
 
 ### PSI-BLAST or BLASTP
 # ## Get PSSM
@@ -146,6 +146,8 @@ msa_records_with_indices = msa_clustal.assign_msa_record_indices(msa_records)
 
 ## Calculate flexibility per position
 
+sys.stderr.write("Calculating flexibility...\n")
+
 incomplete_flexibility = calculate_flexibility.calculate_flex_pos(all_seq_Bnorm, msa_records_with_indices, AF_scores_to_download)
 complete_flexibility = calculate_flexibility.complete_missing_scores(incomplete_flexibility)
 
@@ -163,9 +165,10 @@ else:
 ### Draw flexibility graph
 
 try:
-    output_text_graph.draw_flex_line(complete_flexibility)
+    output_text_graph.draw_flex_line(output_prefix, complete_flexibility)
 
 except:
     pass
+
 else:
     sys.stderr.write("The plot has been created successfully!\n")
