@@ -19,13 +19,14 @@ def select_hits_uniprot(blastp_outFile, number_hits=5):
 
     with open(blastp_outFile) as bpfile:
         for line in bpfile:
-            m = line.split()
+            if "100.00" not in line:
+                m = line.split()
 
-            if m and n<number_hits: # avoids None type objects when there are not matches
-            # selects the indicated number of first hits
-                UniProt_IDs[m[1]] = m[2] # append the word that matched
-                n+=1
-                
+                if m and n<number_hits: # avoids None type objects when there are not matches
+                # selects the indicated number of first hits
+                    UniProt_IDs[m[1]] = m[2] # append the word that matched
+                    n+=1
+
         if UniProt_IDs: # check that UniProt_IDs is not empty
             return(UniProt_IDs)
 
@@ -58,6 +59,6 @@ def download_hits_alphafold(dict_hits_uniprot, pdb_location):
 
         except:
             pass
-          
+
     print ("%s homologues found in AlphaFold" %n)
     return (list_id_chain_separated)
