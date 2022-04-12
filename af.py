@@ -19,7 +19,7 @@ def select_hits_uniprot(blastp_outFile, number_hits=5):
 
     with open(blastp_outFile) as bpfile:
         for line in bpfile:
-            if "100.00" not in line:
+            if "100.000" not in line:
                 m = line.split()
 
                 if m and n<number_hits: # avoids None type objects when there are not matches
